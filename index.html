@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Harness Engineering: Make Your LLM API and CLI Tools Reliable</title>
+  <meta name="description" content="A practical book for developers building reliable AI systems. Covers retry logic, validation, cost tracking, latency budgeting, and context management for LLM APIs.">
+  <meta name="keywords" content="AI harness engineering, LLM reliability, Claude, Anthropic, production AI, harness, LLM API, AI engineering">
+  <link rel="canonical" href="https://harnesstheai.com/">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="book">
+  <meta property="og:title" content="AI Harness Engineering: Make Your LLM API and CLI Tools Reliable">
+  <meta property="og:description" content="Most AI demos work. Most AI products fail. The difference is the harness. 7 chapters on making LLM API calls reliable in production.">
+  <meta property="og:url" content="https://harnesstheai.com/">
+  <meta property="og:image" content="https://harnesstheai.com/images/book1-thumbnail-gumroad.png">
+  <meta property="og:image:width" content="800">
+  <meta property="og:image:height" content="800">
+  <meta property="og:site_name" content="HarnessTheAI">
+  <meta property="book:author" content="Yuen Kit Lai">
+  <meta property="book:isbn" content="">
+
+  <!-- Twitter / X -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="AI Harness Engineering: Make Your LLM API and CLI Tools Reliable">
+  <meta name="twitter:description" content="Most AI demos work. Most AI products fail. The difference is the harness.">
+  <meta name="twitter:image" content="https://harnesstheai.com/images/book1-thumbnail-gumroad.png">
+
+  <!-- Structured data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Book",
+    "name": "AI Harness Engineering: Make Your LLM API and CLI Tools Reliable",
+    "author": {
+      "@type": "Person",
+      "name": "Yuen Kit Lai"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "HarnessTheAI Press"
+    },
+    "datePublished": "2026-04-06",
+    "inLanguage": "en",
+    "genre": "Technology",
+    "url": "https://harnesstheai.com/",
+    "offers": {
+      "@type": "Offer",
+      "price": "25.00",
+      "priceCurrency": "USD",
+      "url": "https://4264153470399.gumroad.com/l/qssfod",
+      "availability": "https://schema.org/InStock"
+    },
+    "description": "A practical book for developers building reliable AI systems. Covers prompt management, input/output validation, retry and fallback logic, cost tracking, latency budgeting, and context management for LLM APIs.",
+    "numberOfPages": "145",
+    "bookFormat": "EBook"
+  }
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    /* ── Reset & Base ─────────────────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:          #e8f5ee;
+      --bg-deep:     #d4ecdf;
+      --accent:      #00a67e;
+      --accent-dark: #007d5e;
+      --text-dark:   #0a3c26;
+      --text-mid:    #163c34;
+      --text-dim:    #3c7860;
+      --text-faint:  #6a9e84;
+      --white:       #ffffff;
+      --stripe-w:    6px;
+      --mono:        'JetBrains Mono', 'Courier New', monospace;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--mono);
+      background: var(--bg);
+      color: var(--text-dark);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* ── Left accent stripe (book motif) ──────────────────────────────────────── */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0; left: 0;
+      width: var(--stripe-w);
+      height: 100vh;
+      background: var(--accent);
+      z-index: 100;
+    }
+
+    /* ── Nav ──────────────────────────────────────────────────────────────────── */
+    nav {
+      position: sticky;
+      top: 0;
+      background: var(--bg);
+      border-bottom: 1px solid var(--bg-deep);
+      padding: 0 48px 0 calc(48px + var(--stripe-w));
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      z-index: 50;
+    }
+
+    .nav-logo {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--accent);
+      letter-spacing: 0.08em;
+      text-decoration: none;
+      text-transform: uppercase;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 32px;
+      list-style: none;
+    }
+
+    .nav-links a {
+      font-size: 12px;
+      color: var(--text-dim);
+      text-decoration: none;
+      letter-spacing: 0.05em;
+      transition: color 0.15s;
+    }
+
+    .nav-links a:hover { color: var(--accent); }
+
+    /* ── Sections ─────────────────────────────────────────────────────────────── */
+    section {
+      padding: 96px 48px 96px calc(48px + var(--stripe-w));
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    /* ── Hero ─────────────────────────────────────────────────────────────────── */
+    .hero {
+      padding-top: 120px;
+      padding-bottom: 80px;
+      display: grid;
+      grid-template-columns: 1fr 320px;
+      gap: 80px;
+      align-items: center;
+    }
+
+    .hero-series {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--text-faint);
+      margin-bottom: 24px;
+    }
+
+    .hero-title {
+      font-size: clamp(40px, 6vw, 72px);
+      font-weight: 700;
+      line-height: 1.05;
+      color: var(--text-dark);
+      margin-bottom: 12px;
+      letter-spacing: -0.02em;
+    }
+
+    .hero-title span { color: var(--accent); }
+
+    .hero-rule {
+      width: 100%;
+      height: 3px;
+      background: var(--accent);
+      margin: 28px 0;
+    }
+
+    .hero-quote {
+      font-size: 18px;
+      font-weight: 500;
+      color: var(--text-mid);
+      line-height: 1.5;
+      margin-bottom: 40px;
+      padding-left: 20px;
+      border-left: 3px solid var(--accent);
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .btn-primary {
+      display: inline-block;
+      background: var(--accent);
+      color: var(--white);
+      font-family: var(--mono);
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      padding: 14px 28px;
+      text-decoration: none;
+      text-transform: uppercase;
+      transition: background 0.15s, transform 0.1s;
+    }
+
+    .btn-primary:hover {
+      background: var(--accent-dark);
+      transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+      display: inline-block;
+      border: 2px solid var(--accent);
+      color: var(--accent);
+      font-family: var(--mono);
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      padding: 12px 28px;
+      text-decoration: none;
+      text-transform: uppercase;
+      transition: background 0.15s, color 0.15s, transform 0.1s;
+    }
+
+    .btn-secondary:hover {
+      background: var(--accent);
+      color: var(--white);
+      transform: translateY(-1px);
+    }
+
+    /* ── Book cover visual ────────────────────────────────────────────────────── */
+    .hero-cover {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .cover-card {
+      background: var(--white);
+      box-shadow: 8px 8px 0 var(--accent);
+      padding: 32px 28px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cover-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 5px;
+      height: 100%;
+      background: var(--accent);
+    }
+
+    .cover-series-label {
+      font-size: 9px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--text-faint);
+      margin-bottom: 10px;
+    }
+
+    .cover-title-lg {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--text-dark);
+      line-height: 1.1;
+      margin-bottom: 20px;
+    }
+
+    .cover-rule {
+      height: 2px;
+      background: var(--accent);
+      margin-bottom: 16px;
+    }
+
+    /* Architecture layers (mini version) */
+    .layers {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      margin-bottom: 20px;
+    }
+
+    .layer {
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 9px;
+      font-weight: 600;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+    }
+
+    .layer-app    { width: 60%; margin: 0 auto; background: #d4ecdf; color: #3c7860; }
+    .layer-active { width: 90%; margin: 0 auto; background: var(--accent); color: var(--white); }
+    .layer-ctx    { width: 78%; margin: 0 auto; background: #bfe0d0; color: #2a6e50; }
+    .layer-api    { width: 68%; margin: 0 auto; background: #cae7d8; color: #357a58; }
+    .layer-found  { width: 58%; margin: 0 auto; background: #d8eee2; color: #3c7860; }
+
+    .cover-subtitle {
+      font-size: 11px;
+      color: var(--text-dim);
+      line-height: 1.5;
+    }
+
+    .cover-author {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-dark);
+      margin-top: 16px;
+      padding-top: 12px;
+      border-top: 2px solid var(--accent);
+    }
+
+    /* ── Problem section ──────────────────────────────────────────────────────── */
+    .problem {
+      background: var(--text-dark);
+      color: var(--white);
+      max-width: 100%;
+      padding: 80px 48px 80px calc(48px + var(--stripe-w));
+    }
+
+    .problem-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 80px;
+      align-items: start;
+    }
+
+    .section-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 20px;
+    }
+
+    .section-heading {
+      font-size: clamp(24px, 3.5vw, 36px);
+      font-weight: 700;
+      line-height: 1.15;
+      letter-spacing: -0.01em;
+      margin-bottom: 24px;
+    }
+
+    .problem .section-heading { color: var(--white); }
+
+    .section-body {
+      font-size: 14px;
+      line-height: 1.8;
+      color: var(--text-dim);
+    }
+
+    .problem .section-body { color: #a0c4b0; }
+
+    .problem-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin-top: 8px;
+    }
+
+    .problem-list li {
+      font-size: 13px;
+      color: #a0c4b0;
+      padding-left: 20px;
+      position: relative;
+      line-height: 1.6;
+    }
+
+    .problem-list li::before {
+      content: '→';
+      position: absolute;
+      left: 0;
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    /* ── Chapters ─────────────────────────────────────────────────────────────── */
+    .chapters-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 2px;
+      margin-top: 48px;
+      background: var(--accent);
+    }
+
+    .chapter-card {
+      background: var(--bg);
+      padding: 28px 24px;
+      transition: background 0.15s;
+    }
+
+    .chapter-card:hover { background: var(--bg-deep); }
+
+    .chapter-num {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 8px;
+    }
+
+    .chapter-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-dark);
+      margin-bottom: 8px;
+      line-height: 1.3;
+    }
+
+    .chapter-desc {
+      font-size: 12px;
+      color: var(--text-dim);
+      line-height: 1.6;
+    }
+
+    /* ── Quotes ───────────────────────────────────────────────────────────────── */
+    .quotes {
+      background: var(--bg-deep);
+      max-width: 100%;
+      padding: 80px 48px 80px calc(48px + var(--stripe-w));
+    }
+
+    .quotes-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 32px;
+    }
+
+    .quote-card {
+      padding: 28px 24px;
+      background: var(--bg);
+      border-top: 3px solid var(--accent);
+    }
+
+    .quote-text {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-mid);
+      line-height: 1.6;
+      margin-bottom: 12px;
+    }
+
+    .quote-source {
+      font-size: 11px;
+      color: var(--text-faint);
+      letter-spacing: 0.05em;
+    }
+
+    /* ── Series ───────────────────────────────────────────────────────────────── */
+    .series-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 24px;
+      margin-top: 48px;
+    }
+
+    .series-card {
+      padding: 24px 20px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .series-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 4px;
+      height: 100%;
+    }
+
+    .series-card.green  { background: #d4ecdf; }
+    .series-card.green::before  { background: #00a67e; }
+    .series-card.blue   { background: #daeaf7; }
+    .series-card.blue::before   { background: #1877bc; }
+    .series-card.purple { background: #ede0f7; }
+    .series-card.purple::before { background: #783cb4; }
+    .series-card.amber  { background: #faebd4; }
+    .series-card.amber::before  { background: #bc5a0a; }
+
+    .series-num {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    .series-card.green  .series-num { color: #00a67e; }
+    .series-card.blue   .series-num { color: #1877bc; }
+    .series-card.purple .series-num { color: #783cb4; }
+    .series-card.amber  .series-num { color: #bc5a0a; }
+
+    .series-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-dark);
+      line-height: 1.3;
+      margin-bottom: 6px;
+    }
+
+    .series-status {
+      font-size: 11px;
+      color: var(--text-dim);
+    }
+
+    /* ── CTA ──────────────────────────────────────────────────────────────────── */
+    .cta-box {
+      background: var(--text-dark);
+      color: var(--white);
+      padding: 64px 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 48px;
+      margin-top: 80px;
+      flex-wrap: wrap;
+    }
+
+    .cta-left { flex: 1; min-width: 280px; }
+
+    .cta-heading {
+      font-size: clamp(20px, 3vw, 28px);
+      font-weight: 700;
+      color: var(--white);
+      line-height: 1.2;
+      margin-bottom: 12px;
+    }
+
+    .cta-sub {
+      font-size: 13px;
+      color: #a0c4b0;
+      line-height: 1.6;
+    }
+
+    .cta-right {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 8px;
+    }
+
+    .cta-price {
+      font-size: 36px;
+      font-weight: 700;
+      color: var(--accent);
+      line-height: 1;
+    }
+
+    .cta-price-note {
+      font-size: 11px;
+      color: #6a9e84;
+      margin-bottom: 16px;
+    }
+
+    /* ── Footer ───────────────────────────────────────────────────────────────── */
+    footer {
+      background: var(--text-dark);
+      border-top: 3px solid var(--accent);
+      padding: 48px 48px 48px calc(48px + var(--stripe-w));
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 32px;
+      flex-wrap: wrap;
+    }
+
+    .footer-brand {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--accent);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 28px;
+      list-style: none;
+    }
+
+    .footer-links a {
+      font-size: 11px;
+      color: #6a9e84;
+      text-decoration: none;
+      letter-spacing: 0.05em;
+      transition: color 0.15s;
+    }
+
+    .footer-links a:hover { color: var(--accent); }
+
+    .footer-copy {
+      font-size: 11px;
+      color: #3c6050;
+    }
+
+    /* ── Animations ───────────────────────────────────────────────────────────── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .hero-series   { animation: fadeUp 0.5s ease both; animation-delay: 0.05s; }
+    .hero-title    { animation: fadeUp 0.5s ease both; animation-delay: 0.1s; }
+    .hero-rule     { animation: fadeUp 0.5s ease both; animation-delay: 0.15s; }
+    .hero-quote    { animation: fadeUp 0.5s ease both; animation-delay: 0.2s; }
+    .hero-actions  { animation: fadeUp 0.5s ease both; animation-delay: 0.25s; }
+    .hero-cover    { animation: fadeUp 0.5s ease both; animation-delay: 0.3s; }
+
+    /* ── Responsive ───────────────────────────────────────────────────────────── */
+    @media (max-width: 800px) {
+      section { padding: 64px 28px 64px calc(28px + var(--stripe-w)); }
+      nav { padding: 0 28px 0 calc(28px + var(--stripe-w)); }
+
+      .hero {
+        grid-template-columns: 1fr;
+        padding-top: 72px;
+        gap: 48px;
+      }
+
+      .hero-cover { display: none; }
+
+      .problem, .quotes {
+        padding: 64px 28px 64px calc(28px + var(--stripe-w));
+      }
+
+      .problem-inner {
+        grid-template-columns: 1fr;
+        gap: 48px;
+      }
+
+      .cta-box {
+        flex-direction: column;
+        padding: 48px 28px;
+      }
+
+      .cta-right { align-items: flex-start; }
+
+      footer {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 40px 28px 40px calc(28px + var(--stripe-w));
+      }
+
+      .nav-links { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Nav -->
+  <nav>
+    <a href="#" class="nav-logo">HarnessTheAI</a>
+    <ul class="nav-links">
+      <li><a href="#chapters">Chapters</a></li>
+      <li><a href="#series">Series</a></li>
+      <li><a href="#buy">Buy</a></li>
+      <li><a href="errata.html">Errata</a></li>
+    </ul>
+  </nav>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-left">
+      <p class="hero-series">AI Harness Engineering Series — Book 1</p>
+      <h1 class="hero-title">
+        Make Your<br>
+        <span>LLM API</span><br>
+        Reliable.
+      </h1>
+      <div class="hero-rule"></div>
+      <blockquote class="hero-quote">
+        "Most AI demos work.<br>Most AI products fail.<br>The difference is the harness."
+      </blockquote>
+      <div class="hero-actions">
+        <a href="https://4264153470399.gumroad.com/l/vurvju" class="btn-primary" target="_blank" rel="noopener">↓ Free Chapter</a>
+        <a href="https://4264153470399.gumroad.com/l/qssfod" class="btn-secondary" target="_blank" rel="noopener">Buy — $25</a>
+      </div>
+    </div>
+
+    <div class="hero-cover">
+      <div class="cover-card">
+        <p class="cover-series-label">AI Harness Engineering Series</p>
+        <h2 class="cover-title-lg">AI Harness<br>Engineering</h2>
+        <div class="cover-rule"></div>
+        <div class="layers">
+          <div class="layer layer-app">Application</div>
+          <div class="layer layer-active">Harness Engineering ▶</div>
+          <div class="layer layer-ctx">Context Engineering</div>
+          <div class="layer layer-api">Inference API</div>
+          <div class="layer layer-found">Foundation Model</div>
+        </div>
+        <p class="cover-subtitle">Make Your LLM API and<br>CLI Tools Reliable</p>
+        <p class="cover-author">Yuen Kit Lai</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Problem -->
+  <div class="problem">
+    <div class="problem-inner">
+      <div>
+        <p class="section-label">The Problem</p>
+        <h2 class="section-heading">You've got it working.<br>Now make it reliable.</h2>
+        <p class="section-body">
+          Most AI books teach you to use the API. This one teaches you to wrap it — with the control infrastructure that separates a demo from a production system.
+        </p>
+      </div>
+      <div>
+        <p class="section-label">Sound Familiar?</p>
+        <ul class="problem-list">
+          <li>Your LLM returns different formats every few calls and breaks downstream code</li>
+          <li>A rate limit spike takes your feature down with no fallback</li>
+          <li>Your token costs doubled this month and you don't know why</li>
+          <li>Responses slow down under load and users think the app is broken</li>
+          <li>Your context fills up mid-conversation and the model forgets what you told it</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Chapters -->
+  <section id="chapters">
+    <p class="section-label">What's Inside</p>
+    <h2 class="section-heading">7 chapters. Every reliability problem covered.</h2>
+
+    <div class="chapters-grid">
+      <div class="chapter-card">
+        <p class="chapter-num">Chapter 1</p>
+        <h3 class="chapter-title">Quick Start: Your First LLM Harness</h3>
+        <p class="chapter-desc">All seven techniques in one working example. Get something running before the deep dives.</p>
+      </div>
+      <div class="chapter-card">
+        <p class="chapter-num">Chapter 2</p>
+        <h3 class="chapter-title">Prompt Management</h3>
+        <p class="chapter-desc">Versioning prompts like code. A/B testing variants. Preventing prompt drift in production.</p>
+      </div>
+      <div class="chapter-card">
+        <p class="chapter-num">Chapter 3</p>
+        <h3 class="chapter-title">Input / Output Validation</h3>
+        <p class="chapter-desc">Schema enforcement on structured outputs. Catching malformed responses before they cause downstream failures.</p>
+      </div>
+      <div class="chapter-card">
+        <p class="chapter-num">Chapter 4</p>
+        <h3 class="chapter-title">Retry & Fallback Logic</h3>
+        <p class="chapter-desc">Handling rate limits, timeouts, and model degradation gracefully. When to retry, when to fallback, when to fail fast.</p>
+      </div>
+      <div class="chapter-card">
+        <p class="chapter-num">Chapter 5</p>
+        <h3 class="chapter-title">Cost Tracking</h3>
+        <p class="chapter-desc">Token metering per request and feature. Setting budgets. Catching runaway spend before it hits the bill.</p>
+      </div>
+      <div class="chapter-card">
+        <p class="chapter-num">Chapter 6</p>
+        <h3 class="chapter-title">Latency Budgeting</h3>
+        <p class="chapter-desc">Timeouts that match UX expectations. Measuring p95. Strategies when the model is too slow.</p>
+      </div>
+      <div class="chapter-card">
+        <p class="chapter-num">Chapter 7</p>
+        <h3 class="chapter-title">Context Management</h3>
+        <p class="chapter-desc">Keeping conversation history within token limits. Summarisation strategies. Sliding windows.</p>
+      </div>
+      <div class="chapter-card">
+        <p class="chapter-num">Appendices B–F</p>
+        <h3 class="chapter-title">Reference Tables</h3>
+        <p class="chapter-desc">Hallucination control, rate limits, cost control, latency, context — each as a symptom → fix reference you can bookmark.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Quotes -->
+  <div class="quotes">
+    <div class="quotes-inner">
+      <div class="quote-card">
+        <p class="quote-text">"A prompt without version control is a bug waiting to happen."</p>
+        <p class="quote-source">— Chapter 2: Prompt Management</p>
+      </div>
+      <div class="quote-card">
+        <p class="quote-text">"Trusting LLM output without validation is like running user input directly in SQL."</p>
+        <p class="quote-source">— Chapter 3: Validation</p>
+      </div>
+      <div class="quote-card">
+        <p class="quote-text">"Average latency is a lie. Your p95 is what pages you at 3am."</p>
+        <p class="quote-source">— Chapter 6: Latency Budgeting</p>
+      </div>
+      <div class="quote-card">
+        <p class="quote-text">"The context window is not a dumping ground. What you put in shapes what comes out."</p>
+        <p class="quote-source">— Chapter 7: Context Management</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Series -->
+  <section id="series">
+    <p class="section-label">The Series</p>
+    <h2 class="section-heading">Four books. One complete picture.</h2>
+    <div class="series-grid">
+      <div class="series-card green">
+        <p class="series-num">Book 1 — Available Now</p>
+        <h3 class="series-title">Make Your LLM API and CLI Tools Reliable</h3>
+        <p class="series-status">145 pages · PDF · $25</p>
+      </div>
+      <div class="series-card blue">
+        <p class="series-num">Book 2 — Available Now</p>
+        <h3 class="series-title">Make Your AI Evaluations Reliable</h3>
+        <p class="series-status">PDF · $25</p>
+      </div>
+      <div class="series-card purple">
+        <p class="series-num">Book 3 — Coming Soon</p>
+        <h3 class="series-title">Make Your RAG Pipelines Reliable</h3>
+        <p class="series-status">In progress</p>
+      </div>
+      <div class="series-card amber">
+        <p class="series-num">Book 4 — Coming Soon</p>
+        <h3 class="series-title">Make Your AI Agents Reliable</h3>
+        <p class="series-status">Planned</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section id="buy" style="padding-top: 0; padding-bottom: 96px;">
+    <div class="cta-box">
+      <div class="cta-left">
+        <h2 class="cta-heading">Start with the free chapter.</h2>
+        <p class="cta-sub">Chapter 1 is free — all seven techniques in one working example. No email required. Download it, run the code, see if it's for you.</p>
+      </div>
+      <div class="cta-right">
+        <a href="https://4264153470399.gumroad.com/l/vurvju" class="btn-primary" target="_blank" rel="noopener" style="margin-bottom: 12px;">↓ Free Chapter</a>
+        <div class="cta-price">$25</div>
+        <p class="cta-price-note">PDF · 145 pages · free updates</p>
+        <a href="https://4264153470399.gumroad.com/l/qssfod" class="btn-secondary" target="_blank" rel="noopener" style="border-color: var(--accent); color: var(--accent);">Buy on Gumroad →</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <span class="footer-brand">HarnessTheAI Press</span>
+    <ul class="footer-links">
+      <li><a href="https://github.com/ai-harness-engineering" target="_blank" rel="noopener">GitHub</a></li>
+      <li><a href="errata.html">Errata</a></li>
+      <li><a href="mailto:">Contact</a></li>
+    </ul>
+    <span class="footer-copy">© 2026 Yuen Kit Lai</span>
+  </footer>
+
+</body>
+</html>
